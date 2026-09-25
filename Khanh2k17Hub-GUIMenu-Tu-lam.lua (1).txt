@@ -1,0 +1,478 @@
+--==================================================
+-- KHANH HUB UI - COMPACT FINAL
+-- Roblox Studio | LocalScript
+--==================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- CONFIG
+local GUI_WIDTH = 430
+local GUI_HEIGHT = 320
+local MINI_SIZE = 40
+local DRAG_THRESHOLD = 8
+
+local minimized = false
+local dragging = false
+local dragMoved = false
+local dragMode
+local dragInput
+local dragStart
+local startPosition
+
+-- CLEANUP
+local old = PlayerGui:FindFirstChild("KhanhHubUI")
+if old then
+    old:Destroy()
+end
+
+-- SCREEN GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "KhanhHubUI"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Gui.Parent = PlayerGui
+
+-- MAIN
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.fromOffset(GUI_WIDTH, GUI_HEIGHT)
+Main.Position = UDim2.new(
+    0.5, -GUI_WIDTH / 2,
+    0.5, -GUI_HEIGHT / 2
+)
+Main.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+Main.BorderSizePixel = 0
+Main.ClipsDescendants = true
+Main.Active = true
+Main.Parent = Gui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Name = "RGBBorder"
+MainStroke.Thickness = 2
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MainStroke.LineJoinMode = Enum.LineJoinMode.Round
+MainStroke.Parent = Main
+
+-- HEADER
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 44)
+Header.BackgroundColor3 = Color3.fromRGB(27, 27, 38)
+Header.BorderSizePixel = 0
+Header.Active = true
+Header.ZIndex = 2
+Header.Parent = Main
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, -100, 1, 0)
+Title.Position = UDim2.fromOffset(12, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Khanh2k17Hub-GUIMenu"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 3
+Title.Parent = Header
+
+-- TOGGLE BUTTON
+local Toggle = Instance.new("TextButton")
+Toggle.Name = "ToggleButton"
+Toggle.Size = UDim2.fromOffset(32, 30)
+Toggle.Position = UDim2.new(1, -72, 0, 7)
+Toggle.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+Toggle.Text = "-"
+Toggle.TextColor3 = Color3.new(1, 1, 1)
+Toggle.TextSize = 24
+Toggle.Font = Enum.Font.GothamBold
+Toggle.AutoButtonColor = false
+Toggle.BorderSizePixel = 0
+Toggle.ZIndex = 5
+Toggle.Parent = Header
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 7)
+ToggleCorner.Parent = Toggle
+
+-- MINI RGB BORDER
+local MiniStroke = Instance.new("UIStroke")
+MiniStroke.Name = "PlusRGBBorder"
+MiniStroke.Thickness = 2
+MiniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MiniStroke.LineJoinMode = Enum.LineJoinMode.Round
+MiniStroke.Enabled = false
+MiniStroke.Parent = Toggle
+
+-- CLOSE BUTTON
+local Close = Instance.new("TextButton")
+Close.Name = "CloseButton"
+Close.Size = UDim2.fromOffset(32, 30)
+Close.Position = UDim2.new(1, -36, 0, 7)
+Close.BackgroundColor3 = Color3.fromRGB(180, 45, 55)
+Close.Text = "X"
+Close.TextColor3 = Color3.new(1, 1, 1)
+Close.TextSize = 17
+Close.Font = Enum.Font.GothamBold
+Close.BorderSizePixel = 0
+Close.ZIndex = 5
+Close.Parent = Header
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 7)
+CloseCorner.Parent = Close
+
+-- SIDEBAR
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 105, 1, -52)
+Sidebar.Position = UDim2.fromOffset(7, 49)
+Sidebar.BackgroundColor3 = Color3.fromRGB(24, 24, 34)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Main
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 9)
+SidebarCorner.Parent = Sidebar
+
+local SidebarList = Instance.new("ScrollingFrame")
+SidebarList.Name = "SidebarList"
+SidebarList.Size = UDim2.new(1, -8, 1, -8)
+SidebarList.Position = UDim2.fromOffset(4, 4)
+SidebarList.BackgroundTransparency = 1
+SidebarList.BorderSizePixel = 0
+SidebarList.ScrollBarThickness = 3
+SidebarList.CanvasSize = UDim2.new(0, 0, 0, 0)
+SidebarList.Parent = Sidebar
+
+-- CONTENT
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -126, 1, -52)
+Content.Position = UDim2.fromOffset(119, 49)
+Content.BackgroundColor3 = Color3.fromRGB(24, 24, 34)
+Content.BorderSizePixel = 0
+Content.Parent = Main
+
+local ContentCorner = Instance.new("UICorner")
+ContentCorner.CornerRadius = UDim.new(0, 9)
+ContentCorner.Parent = Content
+
+local PageTitle = Instance.new("TextLabel")
+PageTitle.Name = "PageTitle"
+PageTitle.Size = UDim2.new(1, -16, 0, 30)
+PageTitle.Position = UDim2.fromOffset(8, 4)
+PageTitle.BackgroundTransparency = 1
+PageTitle.Text = ""
+PageTitle.TextColor3 = Color3.new(1, 1, 1)
+PageTitle.TextSize = 15
+PageTitle.Font = Enum.Font.GothamBold
+PageTitle.TextXAlignment = Enum.TextXAlignment.Left
+PageTitle.Parent = Content
+
+local PageScroll = Instance.new("ScrollingFrame")
+PageScroll.Name = "PageScroll"
+PageScroll.Size = UDim2.new(1, -12, 1, -40)
+PageScroll.Position = UDim2.fromOffset(6, 36)
+PageScroll.BackgroundTransparency = 1
+PageScroll.BorderSizePixel = 0
+PageScroll.ScrollBarThickness = 3
+PageScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+PageScroll.Parent = Content
+
+-- CLOSE CONFIRMATION
+local Confirm = Instance.new("Frame")
+Confirm.Name = "Confirm"
+Confirm.Size = UDim2.fromOffset(260, 135)
+Confirm.AnchorPoint = Vector2.new(0.5, 0.5)
+Confirm.Position = UDim2.fromScale(0.5, 0.5)
+Confirm.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+Confirm.BorderSizePixel = 0
+Confirm.Visible = false
+Confirm.ZIndex = 20
+Confirm.Parent = Gui
+
+local ConfirmCorner = Instance.new("UICorner")
+ConfirmCorner.CornerRadius = UDim.new(0, 12)
+ConfirmCorner.Parent = Confirm
+
+local ConfirmStroke = Instance.new("UIStroke")
+ConfirmStroke.Thickness = 2
+ConfirmStroke.Parent = Confirm
+
+local ConfirmText = Instance.new("TextLabel")
+ConfirmText.Size = UDim2.new(1, -16, 0, 60)
+ConfirmText.Position = UDim2.fromOffset(8, 5)
+ConfirmText.BackgroundTransparency = 1
+ConfirmText.Text = "bro chắc chắn xoá gui?"
+ConfirmText.TextColor3 = Color3.new(1, 1, 1)
+ConfirmText.TextSize = 15
+ConfirmText.Font = Enum.Font.GothamBold
+ConfirmText.TextWrapped = true
+ConfirmText.ZIndex = 21
+ConfirmText.Parent = Confirm
+
+local function createButton(name, text, pos, color)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Size = UDim2.fromOffset(100, 34)
+    button.Position = pos
+    button.BackgroundColor3 = color
+    button.Text = text
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 14
+    button.Font = Enum.Font.GothamBold
+    button.BorderSizePixel = 0
+    button.ZIndex = 21
+    button.Parent = Confirm
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = button
+
+    return button
+end
+
+local Yes = createButton(
+    "Yes",
+    "Đóng",
+    UDim2.fromOffset(20, 88),
+    Color3.fromRGB(180, 45, 55)
+)
+
+local No = createButton(
+    "No",
+    "Hủy",
+    UDim2.fromOffset(140, 88),
+    Color3.fromRGB(50, 50, 70)
+)
+
+-- DRAG SYSTEM
+local function beginDrag(input, mode)
+    if dragging then
+        return
+    end
+
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1
+        and input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    dragging = true
+    dragMoved = false
+    dragMode = mode
+    dragInput = input
+    dragStart = input.Position
+    startPosition = Main.Position
+end
+
+local function updateDrag(input)
+    if not dragging or not dragStart then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.Touch
+        and dragInput ~= input then
+        return
+    end
+
+    if input.UserInputType ~= Enum.UserInputType.MouseMovement
+        and input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    local delta = input.Position - dragStart
+
+    if delta.Magnitude >= DRAG_THRESHOLD then
+        dragMoved = true
+    end
+
+    if dragMoved then
+        Main.Position = UDim2.new(
+            startPosition.X.Scale,
+            startPosition.X.Offset + delta.X,
+            startPosition.Y.Scale,
+            startPosition.Y.Offset + delta.Y
+        )
+    end
+end
+
+-- EXPAND MENU
+local function expandMenu()
+    if not minimized then
+        return
+    end
+
+    minimized = false
+
+    MiniStroke.Enabled = false
+    MainStroke.Enabled = true
+
+    TweenService:Create(
+        Main,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = UDim2.fromOffset(GUI_WIDTH, GUI_HEIGHT)
+        }
+    ):Play()
+
+    Header.Size = UDim2.new(1, 0, 0, 44)
+
+    Toggle.AnchorPoint = Vector2.new(0, 0)
+    Toggle.Position = UDim2.new(1, -72, 0, 7)
+    Toggle.Size = UDim2.fromOffset(32, 30)
+    Toggle.Text = "-"
+    Toggle.TextSize = 24
+    Toggle.BackgroundTransparency = 0
+    Toggle.ZIndex = 5
+
+    Title.Visible = true
+    Close.Visible = true
+    Sidebar.Visible = true
+    Content.Visible = true
+end
+
+-- MINIMIZE MENU
+local function minimizeMenu()
+    if minimized then
+        return
+    end
+
+    minimized = true
+
+    Sidebar.Visible = false
+    Content.Visible = false
+    Title.Visible = false
+    Close.Visible = false
+
+    Header.Size = UDim2.fromScale(1, 1)
+
+    Toggle.AnchorPoint = Vector2.new(0, 0)
+    Toggle.Position = UDim2.fromOffset(0, 0)
+    Toggle.Size = UDim2.fromScale(1, 1)
+    Toggle.Text = "+"
+    Toggle.TextSize = 27
+    Toggle.BackgroundTransparency = 1
+    Toggle.ZIndex = 10
+
+    MainStroke.Enabled = false
+    MiniStroke.Enabled = true
+
+    TweenService:Create(
+        Main,
+        TweenInfo.new(
+            0.2,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = UDim2.fromOffset(MINI_SIZE, MINI_SIZE)
+        }
+    ):Play()
+end
+
+-- HEADER DRAG
+Header.InputBegan:Connect(function(input)
+    if minimized then
+        return
+    end
+
+    local relativeX =
+        input.Position.X - Header.AbsolutePosition.X
+
+    if relativeX > Header.AbsoluteSize.X - 110 then
+        return
+    end
+
+    beginDrag(input, "header")
+end)
+
+-- PLUS BUTTON DRAG
+Toggle.InputBegan:Connect(function(input)
+    if minimized then
+        beginDrag(input, "mini")
+    else
+        beginDrag(input, "toggle")
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    updateDrag(input)
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1
+        and input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    local oldMode = dragMode
+    local wasMoved = dragMoved
+
+    dragging = false
+    dragMoved = false
+    dragMode = nil
+    dragInput = nil
+    dragStart = nil
+    startPosition = nil
+
+    if oldMode == "mini" and not wasMoved and minimized then
+        expandMenu()
+    end
+end)
+
+-- BUTTON EVENTS
+Toggle.Activated:Connect(function()
+    if not minimized then
+        minimizeMenu()
+    end
+end)
+
+Close.Activated:Connect(function()
+    Confirm.Visible = true
+end)
+
+No.Activated:Connect(function()
+    Confirm.Visible = false
+end)
+
+Yes.Activated:Connect(function()
+    Gui:Destroy()
+end)
+
+-- RGB ANIMATION
+task.spawn(function()
+    local hue = 0
+
+    while Gui.Parent do
+        hue = (hue + 0.003) % 1
+        local color = Color3.fromHSV(hue, 1, 1)
+
+        MainStroke.Color = color
+        MiniStroke.Color = color
+        ConfirmStroke.Color = color
+
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+print("KhanhHubUI loaded successfully!")
