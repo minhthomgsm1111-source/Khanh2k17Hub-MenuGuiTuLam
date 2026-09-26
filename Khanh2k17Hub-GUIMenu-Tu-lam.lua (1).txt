@@ -1,6 +1,6 @@
-
 --==================================================
--- KHANH HUB UI - COMPACT FINAL
+-- KHANH2K17 HUB - COMPACT FINAL + API
+-- GUI: Khanh2k17Gui
 -- Roblox Studio | LocalScript
 --==================================================
 
@@ -12,7 +12,10 @@ local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
+--==================================================
 -- CONFIG
+--==================================================
+
 local GUI_WIDTH = 430
 local GUI_HEIGHT = 320
 local MINI_SIZE = 40
@@ -26,21 +29,57 @@ local dragInput
 local dragStart
 local startPosition
 
+--==================================================
 -- CLEANUP
-local old = PlayerGui:FindFirstChild("KhanhHubUI")
+--==================================================
+
+local old = PlayerGui:FindFirstChild("Khanh2k17Gui")
+
 if old then
     old:Destroy()
 end
 
+--==================================================
+-- HELPER FUNCTIONS
+--==================================================
+
+local function createCorner(parent, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 8)
+    corner.Parent = parent
+    return corner
+end
+
+local function createLayout(parent, padding)
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, padding or 6)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = parent
+    return layout
+end
+
+local function createStroke(parent, thickness)
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness or 1
+    stroke.Parent = parent
+    return stroke
+end
+
+--==================================================
 -- SCREEN GUI
+--==================================================
+
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "KhanhHubUI"
+Gui.Name = "Khanh2k17Gui"
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 Gui.Parent = PlayerGui
 
+--==================================================
 -- MAIN
+--==================================================
+
 local Main = Instance.new("Frame")
 Main.Name = "Main"
 Main.Size = UDim2.fromOffset(GUI_WIDTH, GUI_HEIGHT)
@@ -54,18 +93,17 @@ Main.ClipsDescendants = true
 Main.Active = true
 Main.Parent = Gui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = Main
+createCorner(Main, 10)
 
-local MainStroke = Instance.new("UIStroke")
+local MainStroke = createStroke(Main, 2)
 MainStroke.Name = "RGBBorder"
-MainStroke.Thickness = 2
 MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 MainStroke.LineJoinMode = Enum.LineJoinMode.Round
-MainStroke.Parent = Main
 
+--==================================================
 -- HEADER
+--==================================================
+
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 44)
@@ -88,7 +126,10 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.ZIndex = 3
 Title.Parent = Header
 
--- TOGGLE BUTTON
+--==================================================
+-- MINIMIZE BUTTON
+--==================================================
+
 local Toggle = Instance.new("TextButton")
 Toggle.Name = "ToggleButton"
 Toggle.Size = UDim2.fromOffset(32, 30)
@@ -103,20 +144,18 @@ Toggle.BorderSizePixel = 0
 Toggle.ZIndex = 5
 Toggle.Parent = Header
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 7)
-ToggleCorner.Parent = Toggle
+createCorner(Toggle, 7)
 
--- MINI RGB BORDER
-local MiniStroke = Instance.new("UIStroke")
+local MiniStroke = createStroke(Toggle, 2)
 MiniStroke.Name = "PlusRGBBorder"
-MiniStroke.Thickness = 2
 MiniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 MiniStroke.LineJoinMode = Enum.LineJoinMode.Round
 MiniStroke.Enabled = false
-MiniStroke.Parent = Toggle
 
+--==================================================
 -- CLOSE BUTTON
+--==================================================
+
 local Close = Instance.new("TextButton")
 Close.Name = "CloseButton"
 Close.Size = UDim2.fromOffset(32, 30)
@@ -130,11 +169,12 @@ Close.BorderSizePixel = 0
 Close.ZIndex = 5
 Close.Parent = Header
 
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 7)
-CloseCorner.Parent = Close
+createCorner(Close, 7)
 
+--==================================================
 -- SIDEBAR
+--==================================================
+
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 105, 1, -52)
@@ -143,9 +183,7 @@ Sidebar.BackgroundColor3 = Color3.fromRGB(24, 24, 34)
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = Main
 
-local SidebarCorner = Instance.new("UICorner")
-SidebarCorner.CornerRadius = UDim.new(0, 9)
-SidebarCorner.Parent = Sidebar
+createCorner(Sidebar, 9)
 
 local SidebarList = Instance.new("ScrollingFrame")
 SidebarList.Name = "SidebarList"
@@ -157,7 +195,10 @@ SidebarList.ScrollBarThickness = 3
 SidebarList.CanvasSize = UDim2.new(0, 0, 0, 0)
 SidebarList.Parent = Sidebar
 
+--==================================================
 -- CONTENT
+--==================================================
+
 local Content = Instance.new("Frame")
 Content.Name = "Content"
 Content.Size = UDim2.new(1, -126, 1, -52)
@@ -166,9 +207,7 @@ Content.BackgroundColor3 = Color3.fromRGB(24, 24, 34)
 Content.BorderSizePixel = 0
 Content.Parent = Main
 
-local ContentCorner = Instance.new("UICorner")
-ContentCorner.CornerRadius = UDim.new(0, 9)
-ContentCorner.Parent = Content
+createCorner(Content, 9)
 
 local PageTitle = Instance.new("TextLabel")
 PageTitle.Name = "PageTitle"
@@ -190,9 +229,13 @@ PageScroll.BackgroundTransparency = 1
 PageScroll.BorderSizePixel = 0
 PageScroll.ScrollBarThickness = 3
 PageScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+PageScroll.AutomaticCanvasSize = Enum.AutomaticSize.None
 PageScroll.Parent = Content
 
+--==================================================
 -- CLOSE CONFIRMATION
+--==================================================
+
 local Confirm = Instance.new("Frame")
 Confirm.Name = "Confirm"
 Confirm.Size = UDim2.fromOffset(260, 135)
@@ -204,13 +247,9 @@ Confirm.Visible = false
 Confirm.ZIndex = 20
 Confirm.Parent = Gui
 
-local ConfirmCorner = Instance.new("UICorner")
-ConfirmCorner.CornerRadius = UDim.new(0, 12)
-ConfirmCorner.Parent = Confirm
+createCorner(Confirm, 12)
 
-local ConfirmStroke = Instance.new("UIStroke")
-ConfirmStroke.Thickness = 2
-ConfirmStroke.Parent = Confirm
+local ConfirmStroke = createStroke(Confirm, 2)
 
 local ConfirmText = Instance.new("TextLabel")
 ConfirmText.Size = UDim2.new(1, -16, 0, 60)
@@ -224,7 +263,7 @@ ConfirmText.TextWrapped = true
 ConfirmText.ZIndex = 21
 ConfirmText.Parent = Confirm
 
-local function createButton(name, text, pos, color)
+local function createConfirmButton(name, text, pos, color)
     local button = Instance.new("TextButton")
     button.Name = name
     button.Size = UDim2.fromOffset(100, 34)
@@ -238,28 +277,29 @@ local function createButton(name, text, pos, color)
     button.ZIndex = 21
     button.Parent = Confirm
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
-    corner.Parent = button
+    createCorner(button, 7)
 
     return button
 end
 
-local Yes = createButton(
+local Yes = createConfirmButton(
     "Yes",
     "Đóng",
     UDim2.fromOffset(20, 88),
     Color3.fromRGB(180, 45, 55)
 )
 
-local No = createButton(
+local No = createConfirmButton(
     "No",
     "Hủy",
     UDim2.fromOffset(140, 88),
     Color3.fromRGB(50, 50, 70)
 )
 
+--==================================================
 -- DRAG SYSTEM
+--==================================================
+
 local function beginDrag(input, mode)
     if dragging then
         return
@@ -309,7 +349,10 @@ local function updateDrag(input)
     end
 end
 
+--==================================================
 -- EXPAND MENU
+--==================================================
+
 local function expandMenu()
     if not minimized then
         return
@@ -348,7 +391,10 @@ local function expandMenu()
     Content.Visible = true
 end
 
+--==================================================
 -- MINIMIZE MENU
+--==================================================
+
 local function minimizeMenu()
     if minimized then
         return
@@ -387,7 +433,10 @@ local function minimizeMenu()
     ):Play()
 end
 
+--==================================================
 -- HEADER DRAG
+--==================================================
+
 Header.InputBegan:Connect(function(input)
     if minimized then
         return
@@ -403,7 +452,6 @@ Header.InputBegan:Connect(function(input)
     beginDrag(input, "header")
 end)
 
--- PLUS BUTTON DRAG
 Toggle.InputBegan:Connect(function(input)
     if minimized then
         beginDrag(input, "mini")
@@ -441,7 +489,10 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
+--==================================================
 -- BUTTON EVENTS
+--==================================================
+
 Toggle.Activated:Connect(function()
     if not minimized then
         minimizeMenu()
@@ -460,12 +511,346 @@ Yes.Activated:Connect(function()
     Gui:Destroy()
 end)
 
+--==================================================
+-- KHANH2K17 API
+--==================================================
+
+local Window = {}
+local Tabs = {}
+local CurrentTab = nil
+
+local SidebarLayout = createLayout(SidebarList, 5)
+local PageLayout = createLayout(PageScroll, 0)
+
+SidebarLayout:GetPropertyChangedSignal(
+    "AbsoluteContentSize"
+):Connect(function()
+    SidebarList.CanvasSize = UDim2.new(
+        0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 8
+    )
+end)
+
+PageLayout:GetPropertyChangedSignal(
+    "AbsoluteContentSize"
+):Connect(function()
+    PageScroll.CanvasSize = UDim2.new(
+        0, 0, 0, PageLayout.AbsoluteContentSize.Y + 10
+    )
+end)
+
+--==================================================
+-- API: Window:AddTab
+--==================================================
+
+function Window:AddTab(config)
+    config = config or {}
+
+    local name = config.Title or "Tab"
+
+    local Tab = {
+        Title = name,
+        Toggles = {},
+        Buttons = {}
+    }
+
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = name .. "Tab"
+    TabButton.Size = UDim2.new(1, 0, 0, 35)
+    TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    TabButton.Text = name
+    TabButton.TextColor3 = Color3.fromRGB(200, 200, 215)
+    TabButton.TextSize = 13
+    TabButton.Font = Enum.Font.GothamSemibold
+    TabButton.BorderSizePixel = 0
+    TabButton.AutoButtonColor = false
+    TabButton.Parent = SidebarList
+
+    createCorner(TabButton, 7)
+
+    local Container = Instance.new("Frame")
+    Container.Name = name .. "Container"
+    Container.Size = UDim2.new(1, -5, 0, 0)
+    Container.AutomaticSize = Enum.AutomaticSize.Y
+    Container.BackgroundTransparency = 1
+    Container.Visible = false
+    Container.Parent = PageScroll
+
+    local ContainerLayout = createLayout(Container, 7)
+
+    ContainerLayout:GetPropertyChangedSignal(
+        "AbsoluteContentSize"
+    ):Connect(function()
+        if CurrentTab == Tab then
+            PageScroll.CanvasSize = UDim2.new(
+                0, 0,
+                0, ContainerLayout.AbsoluteContentSize.Y + 10
+            )
+        end
+    end)
+
+    Tab.Button = TabButton
+    Tab.Container = Container
+
+    local function selectTab()
+        CurrentTab = Tab
+        PageTitle.Text = name
+
+        for _, item in ipairs(Tabs) do
+            item.Button.BackgroundColor3 =
+                Color3.fromRGB(35, 35, 48)
+
+            item.Button.TextColor3 =
+                Color3.fromRGB(200, 200, 215)
+
+            item.Container.Visible = false
+        end
+
+        TabButton.BackgroundColor3 =
+            Color3.fromRGB(50, 80, 60)
+
+        TabButton.TextColor3 = Color3.new(1, 1, 1)
+
+        Container.Visible = true
+
+        PageScroll.CanvasPosition = Vector2.new(0, 0)
+
+        PageScroll.CanvasSize = UDim2.new(
+            0, 0,
+            0, ContainerLayout.AbsoluteContentSize.Y + 10
+        )
+    end
+
+    Tab.Select = selectTab
+
+    TabButton.Activated:Connect(selectTab)
+
+    --==================================================
+    -- API: Tab:AddToggle
+    --==================================================
+
+    function Tab:AddToggle(Flag, options)
+        options = options or {}
+
+        local title = options.Title or Flag
+        local callback = options.Callback or function() end
+        local enabled = options.Default == true
+
+        local Row = Instance.new("Frame")
+        Row.Name = tostring(Flag) .. "Toggle"
+        Row.Size = UDim2.new(1, -5, 0, 52)
+        Row.BackgroundColor3 = Color3.fromRGB(32, 32, 44)
+        Row.BorderSizePixel = 0
+        Row.Parent = Container
+
+        createCorner(Row, 8)
+
+        local Label = Instance.new("TextLabel")
+        Label.Name = "Title"
+        Label.Size = UDim2.new(1, -75, 1, 0)
+        Label.Position = UDim2.fromOffset(12, 0)
+        Label.BackgroundTransparency = 1
+        Label.Text = title
+        Label.TextColor3 = Color3.new(1, 1, 1)
+        Label.TextSize = 14
+        Label.Font = Enum.Font.GothamSemibold
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Parent = Row
+
+        local Switch = Instance.new("TextButton")
+        Switch.Name = "Switch"
+        Switch.Size = UDim2.fromOffset(46, 25)
+        Switch.Position = UDim2.new(1, -58, 0.5, -12)
+        Switch.BackgroundColor3 = Color3.fromRGB(65, 65, 75)
+        Switch.Text = ""
+        Switch.AutoButtonColor = false
+        Switch.BorderSizePixel = 0
+        Switch.Parent = Row
+
+        createCorner(Switch, 20)
+
+        local Knob = Instance.new("Frame")
+        Knob.Name = "Knob"
+        Knob.Size = UDim2.fromOffset(19, 19)
+        Knob.Position = UDim2.new(0, 3, 0.5, -9)
+        Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+        Knob.BorderSizePixel = 0
+        Knob.Parent = Switch
+
+        createCorner(Knob, 20)
+
+        local function SetValue(value, fireCallback)
+            enabled = value == true
+
+            local color = enabled
+                and Color3.fromRGB(34, 197, 94)
+                or Color3.fromRGB(65, 65, 75)
+
+            local position = enabled
+                and UDim2.new(1, -22, 0.5, -9)
+                or UDim2.new(0, 3, 0.5, -9)
+
+            TweenService:Create(
+                Switch,
+                TweenInfo.new(0.18),
+                {
+                    BackgroundColor3 = color
+                }
+            ):Play()
+
+            TweenService:Create(
+                Knob,
+                TweenInfo.new(0.18),
+                {
+                    Position = position
+                }
+            ):Play()
+
+            if fireCallback ~= false then
+                local ok, err = pcall(callback, enabled)
+
+                if not ok then
+                    warn("KhanhHub Toggle Error:", err)
+                end
+            end
+        end
+
+        Switch.Activated:Connect(function()
+            SetValue(not enabled, true)
+        end)
+
+        local ToggleAPI = {}
+
+        function ToggleAPI:SetValue(value)
+            SetValue(value, true)
+        end
+
+        function ToggleAPI:GetValue()
+            return enabled
+        end
+
+        function ToggleAPI:Destroy()
+            Row:Destroy()
+        end
+
+        table.insert(Tab.Toggles, ToggleAPI)
+
+        SetValue(enabled, false)
+
+        return ToggleAPI
+    end
+
+    --==================================================
+    -- API: Tab:AddButton
+    --==================================================
+
+    function Tab:AddButton(options)
+        options = options or {}
+
+        local Button = Instance.new("TextButton")
+        Button.Name = options.Title or "Button"
+        Button.Size = UDim2.new(1, -5, 0, 42)
+        Button.BackgroundColor3 = Color3.fromRGB(45, 45, 62)
+        Button.Text = options.Title or "Button"
+        Button.TextColor3 = Color3.new(1, 1, 1)
+        Button.TextSize = 14
+        Button.Font = Enum.Font.GothamSemibold
+        Button.BorderSizePixel = 0
+        Button.Parent = Container
+
+        createCorner(Button, 8)
+
+        Button.Activated:Connect(function()
+            if options.Callback then
+                local ok, err = pcall(options.Callback)
+
+                if not ok then
+                    warn("KhanhHub Button Error:", err)
+                end
+            end
+        end)
+
+        table.insert(Tab.Buttons, Button)
+
+        return Button
+    end
+
+    table.insert(Tabs, Tab)
+
+    if #Tabs == 1 then
+        selectTab()
+    end
+
+    return Tab
+end
+
+--==================================================
+-- API: Window:SelectTab
+--==================================================
+
+function Window:SelectTab(Tab)
+    if Tab and Tab.Select then
+        Tab.Select()
+    end
+end
+
+--==================================================
+-- API: Window:Destroy
+--==================================================
+
+function Window:Destroy()
+    if Gui and Gui.Parent then
+        Gui:Destroy()
+    end
+end
+
+--==================================================
+-- ESP SAMPLE
+-- UI TOGGLE ONLY - NO PLAYER SCANNING
+--==================================================
+
+local MainTab = Window:AddTab({
+    Title = "Main"
+})
+
+local ESPEnabled = false
+
+local ESP = MainTab:AddToggle("ESP", {
+    Title = "ESP",
+    Default = false,
+
+    Callback = function(Value)
+        ESPEnabled = Value
+
+        if ESPEnabled then
+            print("KhanhHub: ESP ON")
+        else
+            print("KhanhHub: ESP OFF")
+        end
+    end
+})
+
+-- Expose ESP API
+
+Window.ESP = ESP
+
+function Window:GetESPState()
+    return ESPEnabled
+end
+
+function Window:SetESP(Value)
+    ESP:SetValue(Value)
+end
+
+--==================================================
 -- RGB ANIMATION
+--==================================================
+
 task.spawn(function()
     local hue = 0
 
     while Gui.Parent do
         hue = (hue + 0.003) % 1
+
         local color = Color3.fromHSV(hue, 1, 1)
 
         MainStroke.Color = color
@@ -476,4 +861,13 @@ task.spawn(function()
     end
 end)
 
-print("KhanhHubUI loaded successfully!")
+--==================================================
+-- READY
+--==================================================
+
+print("Khanh2k17Gui loaded successfully!")
+
+-- Example API usage:
+-- Window:SetESP(true)
+-- print(Window:GetESPState())
+-- Window:SelectTab(MainTab)
